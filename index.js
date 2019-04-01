@@ -7,9 +7,15 @@ const JavaParser = require('./grammar/JavaParser').JavaParser
 const JavaParserListener = require('./grammar/JavaParserListener').JavaParserListener
 
 
-class ExitErrorListener extends ErrorListener {
+class FailErrorListener extends ErrorListener {
+  constructor(target) {
+    super()
+    this.target = target
+  }
+
   syntaxError (recognizer, offendingSymbol, line, column, msg, e) {
-    if (require.main == module) process.exit(1)
+    super.syntaxError(recognizer, offendingSymbol, line, column, msg, e)
+    this.target.failed = true
   }
 }
 
@@ -23,7 +29,8 @@ class JavaComplexity extends JavaParserListener {
     let tokens = new antlr.CommonTokenStream(lexer)
     this.parser = new JavaParser(tokens)
     this.parser.buildParseTrees = true
-    this.parser.addErrorListener(new ExitErrorListener())
+    this.failed = false
+    this.parser.addErrorListener(new FailErrorListener(this))
 
     this.complexityList = []
     this.currentComplexity = 1
@@ -42,10 +49,15 @@ class JavaComplexity extends JavaParserListener {
   }
 
   computeComplexity (root) {
-    if (!root) root = 'methodDeclaration'
+    if (!root) root = 'classBodyDeclaration'
 
     let tree = this.parser[root]()
     antlr.tree.ParseTreeWalker.DEFAULT.walk(this, tree)
+
+    if (this.complexityList.length === 0)
+      this.complexityList.push(this.currentComplexity)
+
+    if (this.failed) return [0]
 
     return this.complexityList
   }
@@ -93,7 +105,14 @@ if (require.main === module) {
       input += chunk
   })
   process.stdin.on('end', () => {
-    console.log((new JavaComplexity(input)).computeComplexity(process.argv[2] || 'compilationUnit'))
+    result = [0]
+    roots = ['statement', 'classBodyDeclaration', 'compilationUnit']
+    while (result[0] === 0 && roots.length > 0) {
+      result = (new JavaComplexity(input)).computeComplexity(roots[roots.length - 1])
+      roots.pop()
+    }
+
+    console.log(result)
   })
 }
 
