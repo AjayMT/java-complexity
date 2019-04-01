@@ -106,7 +106,7 @@ if (require.main === module) {
   })
   process.stdin.on('end', () => {
     result = [0]
-    roots = ['statement', 'classBodyDeclaration', 'compilationUnit']
+    roots = ['blockStatements', 'classBodyDeclaration', 'compilationUnit']
     while (result[0] === 0 && roots.length > 0) {
       result = (new JavaComplexity(input)).computeComplexity(roots[roots.length - 1])
       roots.pop()
