@@ -1,9 +1,18 @@
 #!/usr/bin/env node
 
 const antlr = require('antlr4')
+const ErrorListener = antlr.error.ErrorListener
 const JavaLexer = require('./grammar/JavaLexer').JavaLexer
 const JavaParser = require('./grammar/JavaParser').JavaParser
 const JavaParserListener = require('./grammar/JavaParserListener').JavaParserListener
+
+
+class ExitErrorListener extends ErrorListener {
+  syntaxError (recognizer, offendingSymbol, line, column, msg, e) {
+    if (require.main == module) process.exit(1)
+  }
+}
+
 
 class JavaComplexity extends JavaParserListener {
   constructor (input) {
@@ -13,8 +22,8 @@ class JavaComplexity extends JavaParserListener {
     let lexer = new JavaLexer(chars)
     let tokens = new antlr.CommonTokenStream(lexer)
     this.parser = new JavaParser(tokens)
-    // this.parser._errHandler = new antlr.error.BailErrorStrategy()
     this.parser.buildParseTrees = true
+    this.parser.addErrorListener(new ExitErrorListener())
 
     this.complexityList = []
     this.currentComplexity = 1
