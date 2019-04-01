@@ -13,10 +13,11 @@ class JavaComplexity extends JavaParserListener {
     let lexer = new JavaLexer(chars)
     let tokens = new antlr.CommonTokenStream(lexer)
     this.parser = new JavaParser(tokens)
-    this.parser._errHandler = new antlr.error.BailErrorStrategy()
+    // this.parser._errHandler = new antlr.error.BailErrorStrategy()
     this.parser.buildParseTrees = true
 
-    this.complexity = 0
+    this.complexityList = []
+    this.currentComplexity = 1
     this.complexTokens = [
       'if', 'else', 'for', 'while', 'do', 'case', // control flow
       'break', 'continue', // only when in loops, not switch blocks
@@ -37,10 +38,13 @@ class JavaComplexity extends JavaParserListener {
     let tree = this.parser[root]()
     antlr.tree.ParseTreeWalker.DEFAULT.walk(this, tree)
 
-    return this.complexity
+    return this.complexityList
   }
 
-  enterMethodBody (ctx) { this.complexity = 1  }
+  exitMethodBody (ctx) {
+    this.complexityList.push(this.currentComplexity)
+    this.currentComplexity = 1
+  }
 
   enterStatement (ctx) {
     let head = ctx.children[0].getText()
@@ -49,13 +53,13 @@ class JavaComplexity extends JavaParserListener {
       return
 
     if (this.complexTokens.indexOf(head) !== -1) {
-      ++this.complexity
+      ++this.currentComplexity
       this.insideSwitchBlock = false
     }
   }
 
   enterExpression (ctx) {
-    this.complexity += ctx.children.filter(
+    this.currentComplexity += ctx.children.filter(
       (c) => this.complexTokens.indexOf(c.getText()) !== -1
     ).length
   }
@@ -64,7 +68,7 @@ class JavaComplexity extends JavaParserListener {
     this.insideSwitchBlock = true
     let head = ctx.children[0].getText()
     if (this.complexTokens.indexOf(head) !== -1)
-      ++this.complexity
+      ++this.currentComplexity
   }
 
   enterSwitchBlockStatementGroup (ctx) { this.insideSwitchBlock = true }
@@ -80,7 +84,7 @@ if (require.main === module) {
       input += chunk
   })
   process.stdin.on('end', () => {
-    console.log((new JavaComplexity(input)).computeComplexity('compilationUnit'))
+    console.log((new JavaComplexity(input)).computeComplexity(process.argv[2] || 'compilationUnit'))
   })
 }
 

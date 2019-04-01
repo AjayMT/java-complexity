@@ -23,7 +23,7 @@ void main() {
 }
 `
 
-const complexity = (new JavaComplexity(input)).computeComplexity() // => 6
+const complexity = (new JavaComplexity(input)).computeComplexity() // => [ 6 ]
 ```
 
 When invoked from the command line, `java-complexity` reads input from stdin.
@@ -32,11 +32,15 @@ When invoked from the command line, `java-complexity` reads input from stdin.
 ### JavaComplexity.computeComplexity([root])
 `root` is an optional string parameter that specifies the type of syntax node at the root of the parse tree (see `grammar/JavaParser.g4`). It defaults to `'methodDeclaration'`.
 
-This method returns the complexity of the input string passed to the `JavaComplexity` contructor.
-
 ```js
 // a 'compilationUnit' is the root of every Java source file
 (new JavaComplexity(input)).computeComplexity('compilationUnit')
 ```
 
-As of now, `java-complexity` only computes the complexity of a **single method**. If the parse tree spans multiple methods, `computeComplexity` will return the complexity of the last method parsed.
+This function returns a list of cyclomatic complexity values of the methods in `input`.
+
+## Invoking from the command-line
+```
+java-complexity [root]
+```
+The `root` argument is the same as above. Input is read from stdin.
