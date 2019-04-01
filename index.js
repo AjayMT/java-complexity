@@ -21,7 +21,7 @@ class FailErrorListener extends ErrorListener {
 
 
 class JavaComplexity extends JavaParserListener {
-  constructor (input) {
+  constructor (input, suppressErrs) {
     super()
 
     let chars = new antlr.InputStream(input)
@@ -30,6 +30,7 @@ class JavaComplexity extends JavaParserListener {
     this.parser = new JavaParser(tokens)
     this.parser.buildParseTrees = true
     this.failed = false
+    if (suppressErrs) this.parser.removeErrorListeners()
     this.parser.addErrorListener(new FailErrorListener(this))
 
     this.complexityList = []
@@ -107,12 +108,15 @@ if (require.main === module) {
   process.stdin.on('end', () => {
     result = [0]
     roots = ['blockStatements', 'classBodyDeclaration', 'compilationUnit']
+    suppress = process.argv[2]
+
     while (result[0] === 0 && roots.length > 0) {
-      result = (new JavaComplexity(input)).computeComplexity(roots[roots.length - 1])
+      result = (new JavaComplexity(input, suppress)).computeComplexity(roots[roots.length - 1])
       roots.pop()
     }
 
     console.log(result)
+    if (result[0] === 0) process.exit(1)
   })
 }
 
