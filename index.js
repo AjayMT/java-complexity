@@ -98,26 +98,20 @@ class JavaComplexity extends JavaParserListener {
 }
 
 if (require.main === module) {
-  let input = ''
-  process.stdin.setEncoding('utf8')
-  process.stdin.on('readable', () => {
-    let chunk
-    while ((chunk = process.stdin.read()) !== null)
-      input += chunk
-  })
-  process.stdin.on('end', () => {
-    result = [0]
-    roots = ['blockStatements', 'classBodyDeclaration', 'compilationUnit']
-    suppress = process.argv[2]
+  let input = process.argv[2] || ''
+  console.log(input)
 
-    while (result[0] === 0 && roots.length > 0) {
-      result = (new JavaComplexity(input, suppress)).computeComplexity(roots[roots.length - 1])
-      roots.pop()
-    }
+  let result = [0]
+  let roots = ['blockStatements', 'classBodyDeclaration', 'compilationUnit']
+  let suppress = process.argv[3]
 
-    console.log(result)
-    if (result[0] === 0) process.exit(1)
-  })
+  while (result[0] === 0 && roots.length > 0) {
+    result = (new JavaComplexity(input, suppress)).computeComplexity(roots[roots.length - 1])
+    roots.pop()
+  }
+
+  console.log(result)
+  if (result[0] === 0) process.exit(1)
 }
 
 module.exports = JavaComplexity
