@@ -99,7 +99,6 @@ class JavaComplexity extends JavaParserListener {
 
 if (require.main === module) {
   let input = process.argv[2] || ''
-  console.log(input)
 
   let result = [0]
   let roots = ['blockStatements', 'classBodyDeclaration', 'compilationUnit']
