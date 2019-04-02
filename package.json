@@ -1,6 +1,6 @@
 {
   "name": "java-complexity",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "main": "./index.js",
   "bin": {
     "java-complexity": "./index.js"
@@ -8,7 +8,8 @@
   "author": "Ajay Tatachar <ajaymt2@illinois.edu>",
   "license": "MIT",
   "dependencies": {
-    "antlr4": "^4.7.2"
+    "antlr4": "^4.7.2",
+    "minimist": "^1.2.0"
   },
   "repository": {
     "type": "git",

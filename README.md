@@ -3,7 +3,7 @@
 This tool approximates the [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity) of a snippet of Java code, based loosely on [these rules](https://www.leepoint.net/principles_and_practices/complexity/complexity-java-method.html).
 
 ```js
-const JavaComplexity = require('java-complexity');
+const javaComplexity = require('java-complexity');
 
 const input = `
 void main() {
@@ -23,24 +23,25 @@ void main() {
 }
 `
 
-const complexity = (new JavaComplexity(input)).computeComplexity() // => [ 6 ]
+const complexity = javaComplexity(input) // => [ 6 ]
 ```
 
 When invoked from the command line, `java-complexity` reads input from stdin.
 
 ## API
-### JavaComplexity.computeComplexity([root])
-`root` is an optional string parameter that specifies the type of syntax node at the root of the parse tree (see `grammar/JavaParser.g4`). It defaults to `'methodDeclaration'`.
+### javaComplexity(input, [suppressErrors])
+`input` is a string of Java code to process. `suppressErrors` is an optional flag that will suppress error logging.
 
-```js
-// a 'compilationUnit' is the root of every Java source file
-(new JavaComplexity(input)).computeComplexity('compilationUnit')
-```
-
-This function returns a list of cyclomatic complexity values of the methods in `input`.
+This function returns a list of cyclomatic complexity values in the same order as the methods defined in the input string.
+It attempts to parse the input as 
+- an entire compilation unit (i.e package declaration, imports and class definitions)
+- the inside of a class body
+- the inside of a method
+If all of these fail, the function returns a cyclomatic complexity value of 0.
 
 ## Invoking from the command-line
 ```
-java-complexity [root]
+java-complexity [-s] [input]
 ```
-The `root` argument is the same as above. Input is read from stdin.
+
+The `-s` flag suppresses error logging. If `input` is not provided as an argument, it is read from stdin. This program exits with code `1` if it fails to parse the input string.

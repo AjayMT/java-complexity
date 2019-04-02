@@ -24,10 +24,10 @@ class JavaComplexity extends JavaParserListener {
   constructor (input, suppressErrs) {
     super()
 
-    let chars = new antlr.InputStream(input)
-    let lexer = new JavaLexer(chars)
-    let tokens = new antlr.CommonTokenStream(lexer)
-    this.parser = new JavaParser(tokens)
+    this.inputStream = new antlr.InputStream(input)
+    this.lexer = new JavaLexer(this.inputStream)
+    this.tokenStream = new antlr.CommonTokenStream(this.lexer)
+    this.parser = new JavaParser(this.tokenStream)
     this.parser.buildParseTrees = true
     this.failed = false
     if (suppressErrs) this.parser.removeErrorListeners()
@@ -50,7 +50,7 @@ class JavaComplexity extends JavaParserListener {
   }
 
   computeComplexity (root) {
-    if (!root) root = 'classBodyDeclaration'
+    if (!root) root = 'methodSubmission'
 
     let tree = this.parser[root]()
     antlr.tree.ParseTreeWalker.DEFAULT.walk(this, tree)
@@ -97,20 +97,42 @@ class JavaComplexity extends JavaParserListener {
   exitSwitchBlockStatementGroup (ctx) { this.insideSwitchBlock = false }
 }
 
-if (require.main === module) {
-  let input = process.argv[2] || ''
 
+function computeComplexity (input, suppress) {
   let result = [0]
-  let roots = ['blockStatements', 'classBodyDeclaration', 'compilationUnit']
-  let suppress = process.argv[3]
+  let roots = ['snippetSubmission', 'methodSubmission', 'compilationUnit']
 
   while (result[0] === 0 && roots.length > 0) {
+    let root = roots[roots.length - 1]
     result = (new JavaComplexity(input, suppress)).computeComplexity(roots[roots.length - 1])
     roots.pop()
   }
 
-  console.log(result)
-  if (result[0] === 0) process.exit(1)
+  return result
 }
 
-module.exports = JavaComplexity
+
+if (require.main === module) {
+  let opts = require('minimist')(process.argv.slice(2))
+  let input = ''
+
+  function read () {
+    let result = computeComplexity(input, opts['s'])
+    console.log(result)
+    if (result[0] === 0) process.exit(1)
+  }
+
+  if (opts['_'].length > 0) {
+    input = opts['_'][0]
+    read()
+  } else {
+    process.stdin.on('readable', () => {
+      let chunk
+      while ((chunk = process.stdin.read()) !== null)
+        input += chunk
+    })
+    process.stdin.on('end', read)
+  }
+}
+
+module.exports = computeComplexity

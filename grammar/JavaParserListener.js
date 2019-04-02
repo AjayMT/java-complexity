@@ -20,6 +20,24 @@ JavaParserListener.prototype.exitCompilationUnit = function(ctx) {
 };
 
 
+// Enter a parse tree produced by JavaParser#snippetSubmission.
+JavaParserListener.prototype.enterSnippetSubmission = function(ctx) {
+};
+
+// Exit a parse tree produced by JavaParser#snippetSubmission.
+JavaParserListener.prototype.exitSnippetSubmission = function(ctx) {
+};
+
+
+// Enter a parse tree produced by JavaParser#methodSubmission.
+JavaParserListener.prototype.enterMethodSubmission = function(ctx) {
+};
+
+// Exit a parse tree produced by JavaParser#methodSubmission.
+JavaParserListener.prototype.exitMethodSubmission = function(ctx) {
+};
+
+
 // Enter a parse tree produced by JavaParser#packageDeclaration.
 JavaParserListener.prototype.enterPackageDeclaration = function(ctx) {
 };
