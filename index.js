@@ -58,9 +58,12 @@ class JavaComplexity extends JavaParserListener {
     if (this.complexityList.length === 0)
       this.complexityList.push(this.currentComplexity)
 
-    if (this.failed) return [0]
+    if (this.failed) return null
 
-    return this.complexityList
+    return {
+      complexityValues: this.complexityList,
+      total: this.complexityList.reduce((a, b) => a + b, 0)
+    }
   }
 
   exitMethodBody (ctx) {
@@ -99,10 +102,10 @@ class JavaComplexity extends JavaParserListener {
 
 
 function computeComplexity (input, suppress) {
-  let result = [0]
+  let result = null
   let roots = ['snippetSubmission', 'methodSubmission', 'compilationUnit']
 
-  while (result[0] === 0 && roots.length > 0) {
+  while (result === null && roots.length > 0) {
     let root = roots[roots.length - 1]
     result = (new JavaComplexity(input, suppress)).computeComplexity(roots[roots.length - 1])
     roots.pop()
@@ -119,7 +122,7 @@ if (require.main === module) {
   function read () {
     let result = computeComplexity(input, opts['s'])
     console.log(result)
-    if (result[0] === 0) process.exit(1)
+    if (result === null) process.exit(1)
   }
 
   if (opts['_'].length > 0) {
