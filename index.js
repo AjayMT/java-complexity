@@ -36,7 +36,7 @@ class JavaComplexity extends JavaParserListener {
     this.complexityList = []
     this.currentComplexity = 1
     this.complexTokens = [
-      'if', 'else', 'for', 'while', 'do', 'case', // control flow
+      'if', 'else', 'for', 'while', 'do', 'case', 'try', 'catch', // control flow
       'break', 'continue', // only when in loops, not switch blocks
       '&&', '||', '?' // operators
     ]
@@ -68,7 +68,7 @@ class JavaComplexity extends JavaParserListener {
 
   exitMethodBody (ctx) {
     this.complexityList.push(this.currentComplexity)
-    this.currentComplexity = 1
+    this.currentComplexity = 0
   }
 
   enterStatement (ctx) {
@@ -101,14 +101,15 @@ class JavaComplexity extends JavaParserListener {
 }
 
 
-function computeComplexity (input, suppress) {
+function computeComplexity (input, suppress, root) {
   let result = null
-  let roots = ['snippetSubmission', 'methodSubmission', 'compilationUnit']
+  let roots
+  if (typeof root === 'string') roots = [root]
+  else roots = ['snippetSubmission', 'methodSubmission', 'compilationUnit']
 
   while (result === null && roots.length > 0) {
-    let root = roots[roots.length - 1]
-    result = (new JavaComplexity(input, suppress)).computeComplexity(roots[roots.length - 1])
-    roots.pop()
+    let root = roots.pop()
+    result = (new JavaComplexity(input, suppress)).computeComplexity(root)
   }
 
   return result
