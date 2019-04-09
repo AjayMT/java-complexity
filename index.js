@@ -33,15 +33,16 @@ class JavaComplexity extends JavaParserListener {
     if (suppressErrs) this.parser.removeErrorListeners()
     this.parser.addErrorListener(new FailErrorListener(this))
 
-    this.complexityList = []
+    this.complexityValues = {}
     this.currentComplexity = 1
+    this.currentMethodName = 'root'
     this.complexTokens = [
-      'if', 'else', 'for', 'while', 'do', 'case', 'try', 'catch', // control flow
+      'if', 'else', 'for', 'while', 'do', 'case', 'catch', // control flow
       'break', 'continue', // only when in loops, not switch blocks
       '&&', '||', '?' // operators
     ]
 
-    this.insideSwitchBlock = false // there is probably a better way to do this
+    this.insideSwitchBlock = false
 
     // TODO increment complexity for every return statement that isn't the last
     // statement in the method
@@ -55,20 +56,30 @@ class JavaComplexity extends JavaParserListener {
     let tree = this.parser[root]()
     antlr.tree.ParseTreeWalker.DEFAULT.walk(this, tree)
 
-    if (this.complexityList.length === 0)
-      this.complexityList.push(this.currentComplexity)
+    if (Object.values(this.complexityValues).length === 0)
+      this.complexityValues[this.currentMethodName] = this.currentComplexity
 
     if (this.failed) return null
 
     return {
-      complexityValues: this.complexityList,
-      total: this.complexityList.reduce((a, b) => a + b, 0)
+      complexityValues: this.complexityValues,
+      total: Object.values(this.complexityValues).reduce((a, b) => a + b, 0)
     }
   }
 
+  enterMethodDeclaration (ctx) {
+    this.currentMethodName = ctx.children[1].getText()
+  }
+
+  enterClassOrInterfaceModifier (ctx) {
+    if (ctx.getText() === 'public' && this.currentComplexity === 0)
+      this.currentComplexity = 1
+  }
+
   exitMethodBody (ctx) {
-    this.complexityList.push(this.currentComplexity)
+    this.complexityValues[this.currentMethodName] = this.currentComplexity
     this.currentComplexity = 0
+    this.currentMethodName = 'root'
   }
 
   enterStatement (ctx) {
@@ -82,6 +93,8 @@ class JavaComplexity extends JavaParserListener {
       this.insideSwitchBlock = false
     }
   }
+
+  enterCatchClause (ctx) { ++this.currentComplexity }
 
   enterExpression (ctx) {
     this.currentComplexity += ctx.children.filter(

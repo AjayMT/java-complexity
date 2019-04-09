@@ -23,7 +23,7 @@ void main() {
 }
 `
 
-const complexity = javaComplexity(input) // => { complexityValues: [ 6 ], total: 6 }
+const complexity = javaComplexity(input) // => { complexityValues: { main: 6 }, total: 6 }
 ```
 
 When invoked from the command line, `java-complexity` reads input from stdin.
@@ -32,7 +32,7 @@ When invoked from the command line, `java-complexity` reads input from stdin.
 ### javaComplexity(input, [suppressErrors], [root])
 `input` is a string of Java code to process. `suppressErrors` is an optional flag that will suppress error logging. `root` is an optional (string) root grammar rule. 
 
-This function returns a list of cyclomatic complexity values (and a total complexity value) in the same order as the methods defined in the input string.
+This function returns a map of method names to cyclomatic complexity values.
 Unless `root` is specified, it attempts to parse the input as
 - an entire compilation unit (i.e package declaration, imports and class definitions)
 - the inside of a class body

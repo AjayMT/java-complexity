@@ -19,4 +19,16 @@ public class MultipleMethods {
     public int z00t() {
         System.out.println("z00t");
     }
+
+    private void helper() {
+        try {
+            doStuff();
+        } catch (Exception e) {
+            System.out.println("failed to do stuff");
+        }
+    }
+
+    public void helper2() {
+        try { hello(); } finally {}
+    }
 }
