@@ -31,4 +31,9 @@ public class MultipleMethods {
     public void helper2() {
         try { hello(); } finally {}
     }
+
+    public void recursive(int n) {
+        if (n == 0) return n;
+        return recursive(n - 1);
+    }
 }
